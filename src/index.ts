@@ -2,8 +2,8 @@ import fastify from 'fastify';
 import { type FastifyReply, type FastifyRequest } from 'fastify';
 import fastifyEnv from '@fastify/env';
 import fastifyCors from '@fastify/cors';
-import { z } from 'zod';
 import { createTransport } from 'nodemailer';
+import { z } from 'zod';
 
 const schema = {
   type: 'object',
@@ -35,7 +35,7 @@ void app.register(fastifyEnv, {
 
 void app.register(fastifyCors, {
   origin: '*',
-  methods: ['POST'],
+  methods: ['GET', 'POST'],
 });
 
 const bodySchema = z.object({
@@ -46,23 +46,24 @@ const bodySchema = z.object({
   text: z.string(),
 });
 
-const headersSchema = z.object({
-  secretKey: z.string(),
-});
 export type Body = z.infer<typeof bodySchema>;
 
-const port = (process.env.PORT as unknown as number) ?? 3002;
+const port = parseInt(process.env.PORT);
 app.get('/', async (request: FastifyRequest, reply: FastifyReply) => {
   return reply.status(200).type('text/html').send('It Works!');
 });
 app.post<{ Body: Body }>('/', async (request: FastifyRequest, reply: FastifyReply) => {
-  const secretKey = request.headers['secret-key'];
-  if (!secretKey) {
-    return reply.status(400).send({ error: 'secretKey is required' });
+  // Switch header keys to lowercase.
+  const headers = Object.keys(request.headers).reduce((acc, key) => {
+    acc[key.toLowerCase()] = request.headers[key];
+    return acc;
+  }, {});
+  if (!headers['secret-key']) {
+    return reply.status(400).send({ error: 'Secret-Key is required' });
   }
 
-  if (secretKey !== SECRET_KEY) {
-    return reply.status(403).send({ error: 'secretKey is invalid' });
+  if (headers['secret-key'] !== SECRET_KEY) {
+    return reply.status(403).send({ error: 'Secret-Key is invalid' });
   }
 
   let bodyParsed: Body | undefined;
@@ -92,7 +93,6 @@ app.post<{ Body: Body }>('/', async (request: FastifyRequest, reply: FastifyRepl
   });
 
   return reply.status(200).send({ result });
-  // return reply.status(200).type('text/html').send(JSON.stringify(result));
 });
 
 app.listen({ port, host: '0.0.0.0' }, (err) => {

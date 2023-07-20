@@ -45,7 +45,7 @@ curl "http://localhost:3000" \
  -X POST \
  -H "Accept: application/json" \
  -H "Content-Type: application/json" \
- -H "secret-key: notverysecret" \
+ -H "Secret-Key: notverysecret" \
  -d '{
 "from": "Your Name <you@example.com>",
 "to": "user@example.com",
@@ -53,4 +53,24 @@ curl "http://localhost:3000" \
 "subject": "It works!",
 "text": "Hello from emailsender."
 }'
+```
+
+### Send with fetch
+
+```js
+fetch('http://localhost:3000', {
+  method: 'POST',
+  headers: {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    'Secret-Key': 'notverysecret',
+  },
+  body: JSON.stringify({
+    from: 'Your Name <you@example.com>',
+    to: 'user@example.com',
+    replyTo: 'you@example.com',
+    subject: 'It works!',
+    text: 'Hello from emailsender.',
+  }),
+});
 ```
