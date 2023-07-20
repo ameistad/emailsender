@@ -105,7 +105,13 @@ app.listen({ port, host: '0.0.0.0' }, (err) => {
   }
 });
 
-process.on('SIGINT', () => {
-  console.log('Caught interrupt signal, exiting...');
-  process.exit();
-});
+process.on('SIGTERM', () => close());
+process.on('SIGINT', () => close());
+
+function close() {
+  console.log('Running close...');
+  app.close(() => {
+    console.log('Received kill signal, shutting down gracefully');
+    process.exit(0);
+  });
+}
