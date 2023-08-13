@@ -85,7 +85,7 @@ app.post<{ Body: Body }>('/', async (request: FastifyRequest, reply: FastifyRepl
   });
   const result = await transporter.sendMail({
     to,
-    replyTo: replyTo ?? to,
+    replyTo,
     from,
     subject,
     text,
